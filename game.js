@@ -4,6 +4,9 @@ var canvas = null,
     pause=false,
     gameOver=false,
 
+    iBody = new Image(),
+    iFood = new Image(),
+
     body = new Array(),
     wall = new Array(),
     
@@ -21,15 +24,12 @@ function paint(ctx) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     //snake print
-    ctx.fillStyle = '#0f0';
     for (i = 0, l = body.length; i < l; i += 1) {
-        body[i].fill(ctx);
-    }
-
+        ctx.drawImage(iBody, body[i].x, body[i].y);
+        }
 
     //food print
-    ctx.fillStyle = '#f00';
-    food.fill(ctx);
+    ctx.drawImage(iFood, food.x, food.y);
 
     //score print
     ctx.fillStyle = '#fff';
@@ -209,8 +209,13 @@ function init() {
     speed = 25;
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
+
     body[0] = new Rectangle(80, 80, 10, 10);
+    iBody.src = 'assets/body.png';
+    
+    iFood.src = 'assets/fruit.png';
     food = new Rectangle(random(canvas.width / 10 - 1) * 10, random(canvas.height / 10 - 1) * 10, 10, 10);
+   
     wall.push(new Rectangle(200, 100, 10, 10));
     wall.push(new Rectangle(200, 200, 10, 10));
     wall.push(new Rectangle(400, 100, 10, 10));
