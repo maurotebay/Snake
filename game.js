@@ -1,3 +1,4 @@
+(function (window, undefined){
 var canvas = null,
     ctx = null;
     lastPressed = null,
@@ -9,6 +10,12 @@ var canvas = null,
 
     body = new Array(),
     wall = new Array(),
+    
+    
+    FPS = 0,
+    lastUpdate = 0,
+    frames = 0,
+    acumDelta = 0;
     
     score = 0,
     dir=0,
@@ -25,11 +32,11 @@ function paint(ctx) {
 
     //snake print
     for (i = 0, l = body.length; i < l; i += 1) {
-        ctx.drawImage(iBody, body[i].x, body[i].y);
-        }
+        body[i].drawImage(ctx, iBody);
+    }
 
     //food print
-    ctx.drawImage(iFood, food.x, food.y);
+    food.drawImage(ctx, iFood);
 
     //score print
     ctx.fillStyle = '#fff';
@@ -41,13 +48,16 @@ function paint(ctx) {
         wall[i].fill(ctx);
     }
 
+    //print fps
+    ctx.fillText('FPS: ' + FPS, 225, 10);
+
     if(pause){  //pause text
         ctx.fillStyle = '#fff';
         if (gameOver) {
-            ctx.fillText('GAME OVER', 300, 150);
+            ctx.fillText('GAME OVER', 150, 75);
         } 
         else {
-            ctx.fillText('PAUSE', 300, 150);
+            ctx.fillText('PAUSE', 150, 75);
         }
         ctx.textAlign = 'left';
     }
@@ -63,13 +73,29 @@ function repaint() {
 }
 
 function run() {
-    setTimeout(run, 25);
-    act();
+    window.requestAnimationFrame(run);
+
+    var now = Date.now(),
+        deltaTime = (now - lastUpdate) / 1000;
+    
+    if (deltaTime > 1) {
+        deltaTime = 0;
+    }
+    
+    lastUpdate = now;
+    frames += 1;
+    acumDelta += deltaTime;
+    
+    if (acumDelta > 1) {
+        FPS = frames;
+        frames = 0;
+        acumDelta -= 1;
+    }
+
+    act(deltaTime);
 }
 
-function act() {
-
-    var lastPos = body.length - 1;
+function act(deltaTime) {
 
     if(!pause){
 
@@ -78,31 +104,31 @@ function act() {
         }
 
         //direction change
-        if(lastPressed == KEY_UP && dir != 2){
+        if(lastPressed == KEY_UP && dir !== 2){
             dir=0;
         }
-        if(lastPressed == KEY_RIGHT && dir != 3){
+        if(lastPressed == KEY_RIGHT && dir !== 3){
             dir=1;
         }
-        if(lastPressed == KEY_DOWN && dir != 0){
+        if(lastPressed == KEY_DOWN && dir !== 0){
             dir=2;
         }
-        if(lastPressed == KEY_LEFT && dir != 1){
+        if(lastPressed == KEY_LEFT && dir !== 1){
             dir=3;
         }
 
         //movement in diferent directions
-        if(dir == 0){
-            body[0].y -= 2.5;
+        if(dir === 0){
+            body[0].y -= 120 * deltaTime;
         }
-        if(dir == 1){
-            body[0].x += 2.5;
+        if(dir === 1){
+            body[0].x += 120 * deltaTime;
         }
-        if(dir == 2){
-            body[0].y += 2.5;
+        if(dir === 2){
+            body[0].y += 120 * deltaTime;
         }
-        if(dir == 3){
-            body[0].x-= 2.5;
+        if(dir === 3){
+            body[0].x-= 120 * deltaTime;
         }
 
         //if outscreened resets from the other side
@@ -172,14 +198,18 @@ function reset(){
 }
 
 function Rectangle(x, y, width, height){
-    this.x = (x == null) ? 0 : x;
-    this.y = (y == null) ? 0 : y;
-    this.width = (width == null) ? 0 : width;
-    this.height = (height == null) ? this.width : height;
+    this.x = (x === undefined) ? 0 : x;
+    this.y = (y === undefined) ? 0 : y;
+    this.width = (width === undefined) ? 0 : width;
+    this.height = (height === undefined) ? this.width : height;
+}
 
-    this.intersects = function(rect){
+Rectangle.prototype = {
+    constructor: Rectangle,
+    
+    intersects : function(rect){
         
-        if(rect == null){
+        if(rect === undefined){
             window.console.warn('Missing parameters');
         } 
         
@@ -189,18 +219,30 @@ function Rectangle(x, y, width, height){
                 this.y < rect.y + rect.height &&
                 this.y + this.height > rect.y);
         }
-    };
+    },
 
-    this.fill = function (ctx) {
+    fill : function (ctx) {
         
-        if (ctx == null) {
+        if (ctx === undefined) {
             window.console.warn('Missing parameters on function fill');
         } 
         
         else {
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
-    };
+    },
+
+    drawImage : function (ctx, img) {
+        if (img === undefined) {
+            window.console.warn('Missing parameters on function drawImage');
+        } else {
+            if (img.width) {
+                ctx.drawImage(img, this.x, this.y);
+            } else {
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
+        }
+    }
 
 }
 
@@ -210,16 +252,16 @@ function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
-    body[0] = new Rectangle(80, 80, 10, 10);
+    body[0] = new Rectangle(40, 40, 10, 10);
     iBody.src = 'assets/body.png';
     
     iFood.src = 'assets/fruit.png';
     food = new Rectangle(random(canvas.width / 10 - 1) * 10, random(canvas.height / 10 - 1) * 10, 10, 10);
    
+    wall.push(new Rectangle(100, 50, 10, 10));
+    wall.push(new Rectangle(100, 100, 10, 10));
+    wall.push(new Rectangle(200, 50, 10, 10));
     wall.push(new Rectangle(200, 100, 10, 10));
-    wall.push(new Rectangle(200, 200, 10, 10));
-    wall.push(new Rectangle(400, 100, 10, 10));
-    wall.push(new Rectangle(400, 200, 10, 10));
 
     run();
     repaint();
@@ -239,3 +281,4 @@ window.requestAnimationFrame = (function () {
 function random(max){
     return Math.floor(Math.random() * max);
 }
+} (window));
