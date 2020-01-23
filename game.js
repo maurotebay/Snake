@@ -1,7 +1,7 @@
 (function (window, undefined) {
     var canvas = null,
-        ctx = null;
-    lastPressed = null,
+        ctx = null,
+        lastPressed = null,
         pause = false,
         gameOver = false,
 
@@ -16,7 +16,7 @@
         frames = 0,
         acumDelta = 0;
 
-    score = 0,
+        score = 0,
         dir = 0,
         KEY_LEFT = 37,
         KEY_UP = 38,
@@ -62,12 +62,11 @@
         //print fps
         ctx.fillText('FPS: ' + FPS, 225, 10);
 
-        if (pause) {  //pause text
+        if (pause) { //pause text
             ctx.fillStyle = '#fff';
             if (gameOver) {
                 ctx.fillText('GAME OVER', 150, 75);
-            }
-            else {
+            } else {
                 ctx.fillText('PAUSE', 150, 75);
             }
             ctx.textAlign = 'left';
@@ -229,9 +228,7 @@
 
             if (rect === undefined) {
                 window.console.warn('Missing parameters');
-            }
-
-            else {
+            } else {
                 return (this.x < rect.x + rect.width &&
                     this.x + this.width > rect.x &&
                     this.y < rect.y + rect.height &&
@@ -243,9 +240,7 @@
 
             if (ctx === undefined) {
                 window.console.warn('Missing parameters on function fill');
-            }
-
-            else {
+            } else {
                 ctx.fillRect(this.x, this.y, this.width, this.height);
             }
         }
